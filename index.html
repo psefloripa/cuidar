@@ -6,23 +6,25 @@
     <title>Cuidar, Proteger e Conviver</title>
     <meta name="description" content="Curso Educativo para Adolescentes - Programa Saúde na Escola de Florianópolis">
 
-    <!-- Ícone da aba (opcional: troque pela URL de um favicon institucional, se desejar) -->
     <link rel="icon" type="image/png" href="https://i.imgur.com/cdlakCV.png">
 
     <style>
         /*
-         * ESTRATÉGIA:
-         * O Google injeta uma barra de aviso no TOPO da Web App (~38px de altura).
-         * Como não é possível removê-la de dentro do app, esta página "casca"
-         * embute a Web App num iframe e desloca esse iframe para CIMA, de modo que
-         * a barra fique acima da área visível. A altura do iframe é aumentada na
-         * mesma medida para que o rodapé do app não fique cortado embaixo.
+         * Esta página "casca" (hospedada no GitHub Pages) faz duas coisas:
+         * 1) Exibe uma tela de BOAS-VINDAS antes de tudo.
+         * 2) Ao clicar em "Iniciar", revela a Web App embutida num iframe,
+         *    com a barra de aviso do Google deslocada para fora da área visível.
          */
 
         :root {
-            /* Altura da barra de aviso do Google. Se algum dia ela mudar de
-               tamanho, ajuste APENAS este valor. */
-            --barra-google: 16px;
+            /* Altura da barra de aviso do Google. Ajuste só este valor se precisar. */
+            --barra-google: 28px;
+
+            /* Paleta do curso */
+            --roxo: #4c1d95;
+            --roxo-escuro: #2e1065;
+            --teal: #0d9488;
+            --teal-claro: #5eead4;
         }
 
         * {
@@ -35,29 +37,133 @@
             width: 100%;
             height: 100%;
             overflow: hidden;
-            background-color: #4c1d95; /* roxo do app, evita "flash" branco ao carregar */
+            background-color: var(--roxo);
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
         }
 
-        /* Container que ocupa exatamente a tela visível.
-           Usa 100dvh (dynamic viewport height): no celular, acompanha o
-           aparecer/sumir da barra do navegador e do teclado, evitando o
-           bug clássico do 100vh que deixa um vão embaixo. */
+        /* ===================== TELA DE BOAS-VINDAS ===================== */
+        #boas-vindas {
+            position: fixed;
+            inset: 0;
+            z-index: 20;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            text-align: center;
+            padding: 32px 24px;
+
+            /* Imagem de fundo + camada escura roxa por cima para legibilidade.
+               Se o fundo não aparecer, troque .png por .jpg na linha abaixo. */
+            background-image:
+                linear-gradient(rgba(46, 16, 101, 0.78), rgba(13, 148, 136, 0.72)),
+                url('https://i.imgur.com/EQBnSJ2.png');
+            background-size: cover;
+            background-position: center;
+            background-repeat: no-repeat;
+
+            color: #ffffff;
+            transition: opacity 0.7s ease;
+        }
+
+        #boas-vindas.hidden {
+            opacity: 0;
+            pointer-events: none;
+        }
+
+        .bv-conteudo {
+            max-width: 760px;
+            width: 100%;
+            background: rgba(0, 0, 0, 0.35);
+            backdrop-filter: blur(2px);
+            border: 1px solid rgba(255, 255, 255, 0.12);
+            border-radius: 28px;
+            padding: 48px 32px;
+            box-shadow: 0 20px 50px rgba(0, 0, 0, 0.4);
+            animation: surgir 0.8s ease-out;
+        }
+
+        @keyframes surgir {
+            from { opacity: 0; transform: translateY(24px); }
+            to   { opacity: 1; transform: translateY(0); }
+        }
+
+        .bv-titulo {
+            font-size: clamp(2rem, 6vw, 3.4rem);
+            font-weight: 800;
+            line-height: 1.1;
+            margin-bottom: 12px;
+            background: linear-gradient(to right, var(--teal-claro), #ffffff);
+            -webkit-background-clip: text;
+            background-clip: text;
+            -webkit-text-fill-color: transparent;
+        }
+
+        .bv-subtitulo {
+            font-size: clamp(1rem, 3vw, 1.4rem);
+            font-weight: 600;
+            color: var(--teal-claro);
+            margin-bottom: 32px;
+        }
+
+        .bv-descricao {
+            font-size: clamp(1rem, 2.6vw, 1.25rem);
+            line-height: 1.6;
+            color: #f1f5f9;
+            margin-bottom: 40px;
+            max-width: 560px;
+            margin-left: auto;
+            margin-right: auto;
+        }
+
+        .bv-botao {
+            display: inline-flex;
+            align-items: center;
+            gap: 10px;
+            background: var(--teal);
+            color: #ffffff;
+            font-size: clamp(1.1rem, 3vw, 1.35rem);
+            font-weight: 700;
+            border: none;
+            border-radius: 9999px;
+            padding: 16px 40px;
+            cursor: pointer;
+            box-shadow: 0 10px 25px rgba(13, 148, 136, 0.5);
+            transition: transform 0.25s ease, background 0.25s ease, box-shadow 0.25s ease;
+        }
+
+        .bv-botao:hover {
+            background: #0f766e;
+            transform: scale(1.05);
+            box-shadow: 0 14px 32px rgba(13, 148, 136, 0.6);
+        }
+
+        .bv-botao:active {
+            transform: scale(0.98);
+        }
+
+        .bv-botao svg {
+            transition: transform 0.25s ease;
+        }
+
+        .bv-botao:hover svg {
+            transform: translateX(4px);
+        }
+
+        /* ===================== APP (IFRAME) ===================== */
         #wrapper {
             position: fixed;
             top: 0;
             left: 0;
             width: 100%;
-            height: 100vh;        /* fallback para navegadores antigos */
-            height: 100dvh;       /* moderno: acompanha o viewport real */
+            height: 100vh;
+            height: 100dvh;
             overflow: hidden;
         }
 
-        /* O iframe é maior que a tela: ele "sobe" para esconder a barra do
-           Google (top negativo) e ganha altura extra para compensar, de modo
-           que o conteúdo do app continue inteiro. */
         #app-frame {
             position: absolute;
-            top: calc(var(--barra-google) * -1);  /* empurra a barra para fora */
+            top: calc(var(--barra-google) * -1);
             left: 0;
             width: 100%;
             height: calc(100% + var(--barra-google));
@@ -65,8 +171,7 @@
             display: block;
         }
 
-        /* Tela de carregamento exibida enquanto o app dentro do iframe inicia.
-           Some sozinha quando o iframe termina de carregar. */
+        /* Tela de carregamento do app (entre o clique e o app aparecer) */
         #loading {
             position: fixed;
             inset: 0;
@@ -76,9 +181,8 @@
             align-items: center;
             justify-content: center;
             gap: 24px;
-            background: linear-gradient(135deg, #4c1d95 0%, #0f766e 100%);
+            background: linear-gradient(135deg, var(--roxo) 0%, var(--teal) 100%);
             color: #ffffff;
-            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
             transition: opacity 0.6s ease;
         }
 
@@ -111,21 +215,34 @@
     </style>
 </head>
 <body>
-    <!-- Tela de carregamento (desaparece quando o iframe carrega) -->
-    <div id="loading">
+    <!-- ============ TELA DE BOAS-VINDAS ============ -->
+    <div id="boas-vindas">
+        <div class="bv-conteudo">
+            <h1 class="bv-titulo">Cuidar, Proteger e Conviver</h1>
+            <p class="bv-subtitulo">Saúde Mental e Prevenção de Violências</p>
+            <p class="bv-descricao">
+                Este é um curso desenvolvido pela Secretaria Municipal de Saúde de Florianópolis.
+            </p>
+            <button class="bv-botao" id="btn-iniciar" type="button">
+                Clique aqui para iniciar!
+                <svg xmlns="http://www.w3.org/2000/svg" width="26" height="26" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+                    <line x1="5" y1="12" x2="19" y2="12"></line>
+                    <polyline points="12 5 19 12 12 19"></polyline>
+                </svg>
+            </button>
+        </div>
+    </div>
+
+    <!-- ============ TELA DE CARREGAMENTO DO APP ============ -->
+    <div id="loading" class="hidden">
         <div class="spinner"></div>
         <p>Carregando o curso...</p>
     </div>
 
-    <!-- Container da tela cheia -->
+    <!-- ============ APP (IFRAME) ============ -->
     <div id="wrapper">
-        <!--
-            IMPORTANTE: o atributo src abaixo deve apontar para a SUA Web App.
-            Esta é a URL terminada em /exec que aparece ao implantar.
-        -->
         <iframe
             id="app-frame"
-            src="https://script.google.com/a/macros/espfloripa.com/s/AKfycbwfu-6dDzNP-vZukihW5WfQJfi83OIYiae-Qcxhj8oZ6PhwTTJ4vs8-zK2Blge9EsoM/exec"
             title="Cuidar, Proteger e Conviver"
             allow="fullscreen; clipboard-write"
             allowfullscreen>
@@ -133,23 +250,42 @@
     </div>
 
     <script>
-        // Esconde a tela de carregamento assim que o iframe terminar de carregar.
-        var frame = document.getElementById('app-frame');
+        var boasVindas = document.getElementById('boas-vindas');
         var loading = document.getElementById('loading');
+        var frame = document.getElementById('app-frame');
+        var btnIniciar = document.getElementById('btn-iniciar');
 
+        // URL da Web App (termina em /exec). Mantenha igual a sua implantacao.
+        var URL_APP = "https://script.google.com/a/macros/espfloripa.com/s/AKfycbwfu-6dDzNP-vZukihW5WfQJfi83OIYiae-Qcxhj8oZ6PhwTTJ4vs8-zK2Blge9EsoM/exec";
+
+        var appCarregado = false;
+
+        // Quando o iframe termina de carregar, some a tela de carregamento.
         frame.addEventListener('load', function () {
-            // pequeno atraso para o React renderizar a primeira tela
+            if (!appCarregado) return; // ignora o load inicial (iframe vazio)
             setTimeout(function () {
                 loading.classList.add('hidden');
             }, 600);
         });
 
-        // Rede de segurança: se por algum motivo o evento 'load' não disparar
-        // (acontece às vezes com conteúdo de origem cruzada), esconde mesmo assim
-        // após 6 segundos para não deixar o aluno preso na tela de carregamento.
-        setTimeout(function () {
-            loading.classList.add('hidden');
-        }, 6000);
+        // Ao clicar em "Iniciar": mostra carregamento, esconde boas-vindas,
+        // e só então carrega o app no iframe.
+        btnIniciar.addEventListener('click', function () {
+            appCarregado = true;
+            loading.classList.remove('hidden');
+            boasVindas.classList.add('hidden');
+
+            // Carrega o app (atrasa um tiquinho para a transição ficar suave)
+            setTimeout(function () {
+                frame.src = URL_APP;
+            }, 200);
+
+            // Rede de segurança: esconde o carregamento após 7s mesmo que o
+            // evento 'load' não dispare (comum com conteúdo de origem cruzada).
+            setTimeout(function () {
+                loading.classList.add('hidden');
+            }, 7000);
+        });
     </script>
 </body>
 </html>
