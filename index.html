@@ -213,104 +213,52 @@
             padding: 0 24px;
         }
 
-        /* ===================== TELA DE FALLBACK (falha ao carregar) ===================== */
-        #fallback {
+        /* ===================== BOTÃO DE CANTO (saída sempre visível) ===================== */
+        /* Fica por cima do iframe durante o uso. Se o curso abre, o aluno pode
+           ignorá-lo; se aparece a tela de erro do Google dentro do iframe, este
+           botão é a saída imediata para abrir o curso em nova aba. */
+        #botao-canto {
             position: fixed;
-            inset: 0;
-            z-index: 30;
-            display: none; /* exibida via JS quando o app não carrega */
-            flex-direction: column;
+            bottom: 16px;
+            right: 16px;
+            z-index: 15;
+            display: none; /* ativado via JS após o clique em Iniciar */
             align-items: center;
-            justify-content: center;
-            text-align: center;
-            padding: 32px 24px;
-            background: linear-gradient(135deg, var(--roxo) 0%, var(--teal) 100%);
+            gap: 8px;
+            background: rgba(46, 16, 101, 0.92);
             color: #ffffff;
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+            font-size: 0.9rem;
+            font-weight: 600;
+            text-decoration: none;
+            border: 1px solid rgba(255, 255, 255, 0.25);
+            border-radius: 9999px;
+            padding: 10px 18px;
+            box-shadow: 0 6px 18px rgba(0, 0, 0, 0.35);
+            backdrop-filter: blur(4px);
+            transition: transform 0.2s ease, background 0.2s ease;
+            max-width: calc(100vw - 32px);
         }
 
-        #fallback.show {
-            display: flex;
+        #botao-canto.show {
+            display: inline-flex;
             animation: surgir 0.5s ease-out;
         }
 
-        .fb-conteudo {
-            max-width: 560px;
-            width: 100%;
-        }
-
-        .fb-icone {
-            margin-bottom: 20px;
-            opacity: 0.9;
-        }
-
-        .fb-titulo {
-            font-size: clamp(1.5rem, 5vw, 2.2rem);
-            font-weight: 800;
-            line-height: 1.15;
-            margin-bottom: 14px;
-        }
-
-        .fb-texto {
-            font-size: clamp(1rem, 2.6vw, 1.2rem);
-            line-height: 1.6;
-            color: #f1f5f9;
-            margin-bottom: 36px;
-        }
-
-        .fb-botoes {
-            display: flex;
-            flex-direction: column;
-            gap: 14px;
-            align-items: center;
-            width: 100%;
-        }
-
-        .fb-botao-principal {
-            display: inline-flex;
-            align-items: center;
-            justify-content: center;
-            gap: 10px;
-            background: #ffffff;
-            color: var(--roxo-escuro);
-            font-size: clamp(1.05rem, 3vw, 1.25rem);
-            font-weight: 700;
-            border: none;
-            border-radius: 9999px;
-            padding: 16px 36px;
-            cursor: pointer;
-            text-decoration: none;
-            box-shadow: 0 10px 25px rgba(0, 0, 0, 0.3);
-            transition: transform 0.2s ease, box-shadow 0.2s ease;
-            width: 100%;
-            max-width: 380px;
-        }
-
-        .fb-botao-principal:hover {
+        #botao-canto:hover {
+            background: rgba(13, 148, 136, 0.95);
             transform: scale(1.04);
-            box-shadow: 0 14px 30px rgba(0, 0, 0, 0.4);
         }
 
-        .fb-botao-secundario {
-            display: inline-flex;
-            align-items: center;
-            justify-content: center;
-            gap: 8px;
-            background: transparent;
-            color: #ffffff;
-            font-size: clamp(0.95rem, 2.5vw, 1.1rem);
-            font-weight: 600;
-            border: 2px solid rgba(255, 255, 255, 0.5);
-            border-radius: 9999px;
-            padding: 12px 32px;
-            cursor: pointer;
-            transition: background 0.2s ease, border-color 0.2s ease;
-            width: 100%;
-            max-width: 380px;
+        #botao-canto svg {
+            flex-shrink: 0;
         }
 
-        .fb-botao-secundario:hover {
-            background: rgba(255, 255, 255, 0.15);
-            border-color: rgba(255, 255, 255, 0.8);
+        /* Em telas bem estreitas, encurta o texto do botão de canto */
+        .botao-canto-texto-curto { display: none; }
+        @media (max-width: 480px) {
+            .botao-canto-texto-completo { display: none; }
+            .botao-canto-texto-curto { display: inline; }
         }
     </style>
 </head>
@@ -339,40 +287,16 @@
         <p>Carregando o curso...</p>
     </div>
 
-    <!-- ============ TELA DE FALLBACK (se o app não abrir) ============ -->
-    <div id="fallback">
-        <div class="fb-conteudo">
-            <div class="fb-icone">
-                <svg xmlns="http://www.w3.org/2000/svg" width="64" height="64" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">
-                    <circle cx="12" cy="12" r="10"></circle>
-                    <line x1="12" y1="8" x2="12" y2="12"></line>
-                    <line x1="12" y1="16" x2="12.01" y2="16"></line>
-                </svg>
-            </div>
-            <h2 class="fb-titulo">O curso está demorando para abrir</h2>
-            <p class="fb-texto">
-                Isso pode acontecer por instabilidade na conexão. Clique no botão abaixo para abrir o curso diretamente em uma nova aba.
-            </p>
-            <div class="fb-botoes">
-                <a class="fb-botao-principal" id="btn-nova-aba" href="#" target="_blank" rel="noopener">
-                    Abrir o curso em nova aba
-                    <svg xmlns="http://www.w3.org/2000/svg" width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round">
-                        <path d="M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6"></path>
-                        <polyline points="15 3 21 3 21 9"></polyline>
-                        <line x1="10" y1="14" x2="21" y2="3"></line>
-                    </svg>
-                </a>
-                <button class="fb-botao-secundario" id="btn-tentar-novamente" type="button">
-                    <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round">
-                        <polyline points="23 4 23 10 17 10"></polyline>
-                        <polyline points="1 20 1 14 7 14"></polyline>
-                        <path d="M3.51 9a9 9 0 0 1 14.85-3.36L23 10M1 14l4.64 4.36A9 9 0 0 0 20.49 15"></path>
-                    </svg>
-                    Tentar novamente
-                </button>
-            </div>
-        </div>
-    </div>
+    <!-- ============ BOTÃO DE CANTO (saída sempre disponível) ============ -->
+    <a id="botao-canto" href="#" target="_blank" rel="noopener">
+        <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round">
+            <path d="M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6"></path>
+            <polyline points="15 3 21 3 21 9"></polyline>
+            <line x1="10" y1="14" x2="21" y2="3"></line>
+        </svg>
+        <span class="botao-canto-texto-completo">O curso não abriu? Abrir em nova aba</span>
+        <span class="botao-canto-texto-curto">Abrir em nova aba</span>
+    </a>
 
     <!-- ============ APP (IFRAME) ============ -->
     <div id="wrapper">
@@ -387,78 +311,52 @@
     <script>
         var boasVindas = document.getElementById('boas-vindas');
         var loading = document.getElementById('loading');
-        var fallback = document.getElementById('fallback');
         var frame = document.getElementById('app-frame');
         var btnIniciar = document.getElementById('btn-iniciar');
-        var btnNovaAba = document.getElementById('btn-nova-aba');
-        var btnTentarNovamente = document.getElementById('btn-tentar-novamente');
+        var botaoCanto = document.getElementById('botao-canto');
 
         // URL da Web App (termina em /exec). Mantenha igual à sua implantação.
         var URL_APP = "https://script.google.com/a/macros/espfloripa.com/s/AKfycbwfu-6dDzNP-vZukihW5WfQJfi83OIYiae-Qcxhj8oZ6PhwTTJ4vs8-zK2Blge9EsoM/exec";
 
-        // Tempo (ms) que esperamos o app abrir antes de mostrar o fallback.
-        var TEMPO_LIMITE = 12000; // 12 segundos
+        // Tempo (ms) até esconder a tela de carregamento (o app aparece por baixo).
+        var TEMPO_CARREGAMENTO = 4000;
 
-        var appCarregou = false;      // o iframe sinalizou 'load' com conteúdo?
-        var tentouCarregar = false;   // já houve clique em Iniciar?
-        var timerFallback = null;     // referência do temporizador de falha
+        // O botão de canto aponta para a URL direta do Apps Script.
+        botaoCanto.setAttribute('href', URL_APP);
 
-        // Aponta o botão da nova aba para a URL direta do Apps Script.
-        btnNovaAba.setAttribute('href', URL_APP);
+        // OBSERVAÇÃO IMPORTANTE:
+        // Por segurança, o navegador NÃO permite que esta página inspecione o
+        // conteúdo do iframe (é de outra origem: script.google.com). Além disso,
+        // o evento 'load' do iframe dispara MESMO quando o que carrega é a página
+        // de erro do próprio navegador ("conexão recusada"). Por isso NÃO dá para
+        // detectar automaticamente se o curso abriu ou falhou.
+        //
+        // Solução: o botão de canto ("Abrir em nova aba") fica SEMPRE visível
+        // enquanto o curso é usado. Se o curso abre, o aluno pode ignorá-lo; se
+        // aparece a tela de erro do Google dentro do iframe, o botão é a saída
+        // imediata — sem depender de detecção automática.
 
-        // Quando o iframe termina de carregar de fato, cancela o fallback
-        // e esconde a tela de carregamento.
-        frame.addEventListener('load', function () {
-            if (!tentouCarregar) return; // ignora o 'load' inicial (iframe vazio)
-            appCarregou = true;
-            if (timerFallback) { clearTimeout(timerFallback); timerFallback = null; }
-            setTimeout(function () {
-                loading.classList.add('hidden');
-            }, 600);
-        });
-
-        // Função que inicia (ou reinicia) o carregamento do curso no iframe.
+        // Inicia o carregamento do curso no iframe.
         function iniciarCurso() {
-            tentouCarregar = true;
-            appCarregou = false;
-
-            // Mostra o carregamento, esconde boas-vindas e fallback.
-            fallback.classList.remove('show');
             boasVindas.classList.add('hidden');
             loading.classList.remove('hidden');
 
-            // (Re)carrega o app no iframe. Adicionamos um parâmetro de tempo
-            // para forçar o navegador a refazer a requisição em nova tentativa.
+            // Carrega o app. O parâmetro de tempo evita reaproveitar uma
+            // tentativa anterior que tenha travado.
             var separador = URL_APP.indexOf('?') === -1 ? '?' : '&';
             setTimeout(function () {
                 frame.src = URL_APP + separador + 't=' + Date.now();
-            }, 200);
+            }, 150);
 
-            // Arma o temporizador: se em TEMPO_LIMITE o app não sinalizou
-            // carregamento, mostra a tela de fallback.
-            if (timerFallback) clearTimeout(timerFallback);
-            timerFallback = setTimeout(function () {
-                if (!appCarregou) {
-                    loading.classList.add('hidden');
-                    fallback.classList.add('show');
-                }
-            }, TEMPO_LIMITE);
+            // Esconde o carregamento após um tempo fixo, revelando o que estiver
+            // no iframe, e mostra o botão de canto como saída de segurança.
+            setTimeout(function () {
+                loading.classList.add('hidden');
+                botaoCanto.classList.add('show');
+            }, TEMPO_CARREGAMENTO);
         }
 
-        // Clique inicial em "Iniciar" na tela de boas-vindas.
         btnIniciar.addEventListener('click', iniciarCurso);
-
-        // "Tentar novamente" na tela de fallback: refaz a tentativa no iframe.
-        btnTentarNovamente.addEventListener('click', iniciarCurso);
-
-        // "Abrir em nova aba": o próprio <a target="_blank"> já abre a URL.
-        // Ao voltar para esta aba, escondemos o fallback (curso já foi aberto fora).
-        btnNovaAba.addEventListener('click', function () {
-            setTimeout(function () {
-                fallback.classList.remove('show');
-                loading.classList.add('hidden');
-            }, 400);
-        });
     </script>
 </body>
 </html>
