@@ -222,7 +222,7 @@
             bottom: 16px;
             right: 16px;
             z-index: 15;
-            display: none; /* ativado via JS após o clique em Iniciar */
+            display: inline-flex;
             align-items: center;
             gap: 8px;
             background: rgba(46, 16, 101, 0.92);
@@ -236,18 +236,27 @@
             padding: 10px 18px;
             box-shadow: 0 6px 18px rgba(0, 0, 0, 0.35);
             backdrop-filter: blur(4px);
-            transition: transform 0.2s ease, background 0.2s ease;
             max-width: calc(100vw - 32px);
+
+            /* Oculto por padrão, com fade suave ao entrar e sair. Quando oculto,
+               não captura cliques (pointer-events + visibility). */
+            opacity: 0;
+            visibility: hidden;
+            transform: translateY(8px);
+            pointer-events: none;
+            transition: opacity 0.5s ease, transform 0.5s ease, visibility 0.5s ease, background 0.2s ease;
         }
 
         #botao-canto.show {
-            display: inline-flex;
-            animation: surgir 0.5s ease-out;
+            opacity: 1;
+            visibility: visible;
+            transform: translateY(0);
+            pointer-events: auto;
         }
 
-        #botao-canto:hover {
+        #botao-canto.show:hover {
             background: rgba(13, 148, 136, 0.95);
-            transform: scale(1.04);
+            transform: translateY(-2px) scale(1.04);
         }
 
         #botao-canto svg {
@@ -321,6 +330,15 @@
         // Tempo (ms) até esconder a tela de carregamento (o app aparece por baixo).
         var TEMPO_CARREGAMENTO = 4000;
 
+        // Tempo (ms) até exibir o botão de acesso direto no canto. Fica INVISÍVEL
+        // antes disso: no fluxo normal o curso já abriu e o aluno nunca o vê. Ele
+        // só aparece se, passado esse tempo, a pessoa ainda estiver na página —
+        // o que na prática indica que o carregamento travou.
+        var TEMPO_BOTAO_CANTO = 15000; // 15 segundos até aparecer
+
+        // Depois de aparecer, o botão some após este tempo (aparição única).
+        var BOTAO_VISIVEL = 8000; // fica visível por 8 segundos, depois some
+
         // O botão de canto aponta para a URL direta do Apps Script.
         botaoCanto.setAttribute('href', URL_APP);
 
@@ -329,12 +347,11 @@
         // conteúdo do iframe (é de outra origem: script.google.com). Além disso,
         // o evento 'load' do iframe dispara MESMO quando o que carrega é a página
         // de erro do próprio navegador ("conexão recusada"). Por isso NÃO dá para
-        // detectar automaticamente se o curso abriu ou falhou.
+        // detectar com certeza se o curso abriu ou falhou.
         //
-        // Solução: o botão de canto ("Abrir em nova aba") fica SEMPRE visível
-        // enquanto o curso é usado. Se o curso abre, o aluno pode ignorá-lo; se
-        // aparece a tela de erro do Google dentro do iframe, o botão é a saída
-        // imediata — sem depender de detecção automática.
+        // Solução: o botão de acesso direto fica escondido no fluxo normal e só
+        // aparece após TEMPO_BOTAO_CANTO, sumindo em seguida. Isso reserva o
+        // acesso direto para as exceções sem estimular o uso no dia a dia.
 
         // Inicia o carregamento do curso no iframe.
         function iniciarCurso() {
@@ -348,12 +365,18 @@
                 frame.src = URL_APP + separador + 't=' + Date.now();
             }, 150);
 
-            // Esconde o carregamento após um tempo fixo, revelando o que estiver
-            // no iframe, e mostra o botão de canto como saída de segurança.
+            // Esconde a tela de carregamento, revelando o que estiver no iframe.
             setTimeout(function () {
                 loading.classList.add('hidden');
-                botaoCanto.classList.add('show');
             }, TEMPO_CARREGAMENTO);
+
+            // Bem depois, exibe o botão de acesso direto e o esconde em seguida.
+            setTimeout(function () {
+                botaoCanto.classList.add('show');
+                setTimeout(function () {
+                    botaoCanto.classList.remove('show');
+                }, BOTAO_VISIVEL);
+            }, TEMPO_BOTAO_CANTO);
         }
 
         btnIniciar.addEventListener('click', iniciarCurso);
